@@ -4,7 +4,6 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Handler;
 import android.provider.MediaStore;
 
 import org.robobind.tuku.mapping.ImageListItemValueModel;
@@ -33,7 +32,6 @@ public class ImageListPresentationModel implements HasPresentationModelChangeSup
     }
 
     public void loadImagePath() {
-        mViewActivity.imageLoading();
         Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
         ContentResolver contentResolver = mViewActivity.getContentResolver();
         Cursor mCursor = contentResolver.query(uri, null, MediaStore.Images.Media.MIME_TYPE + "=? or "
@@ -45,13 +43,6 @@ public class ImageListPresentationModel implements HasPresentationModelChangeSup
                     .getColumnIndex(MediaStore.Images.Media.DATA));
             mPhotoPathList.add(path);
         }
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mViewActivity.imageLoadFinish();
-            }
-        }, 100);
-        //mViewActivity.imageLoadFinish();
     }
 
 

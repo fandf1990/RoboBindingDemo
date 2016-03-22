@@ -115,7 +115,6 @@ dependencies {
     //aspectPath "org.robobinding:robobinding:${robobindingVersion}:with-aop"
     apt "org.robobinding:codegen:$robobindingVersion"
     compile 'com.github.bumptech.glide:glide:3.7.0'
-    compile 'com.github.vlonjatg:progress-activity:v1.0.3'
     compile 'it.sephiroth.android.library.imagezoom:imagezoom:+'
 }
 
