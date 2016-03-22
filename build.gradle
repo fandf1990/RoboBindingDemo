@@ -1,0 +1,37 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+        maven() {
+            name 'RoboBinding AspectJPlugin Maven Repository'
+            url "https://github.com/RoboBinding/RoboBinding-aspectj-plugin/raw/master/mavenRepo"
+            //url "file://D:/git/RoboBinding-aspectj-plugin/mavenRepo"
+        }
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.1.0-alpha3'
+        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.+'
+        //classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.4.2'
+        classpath 'com.mcxiaoke.gradle:packer:1.0.+'
+        classpath 'net.jokubasdargis.buildtimer:gradle-plugin:0.2.0'
+        //classpath 'org.robobinding:aspectj-plugin:0.8.+'
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+allprojects {
+    repositories {
+        jcenter()
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+
+//task println <<{
+//    printf("======== hello hello  666 ========")
+//}

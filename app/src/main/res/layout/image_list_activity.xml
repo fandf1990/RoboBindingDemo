@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bind="http://robobinding.org/android"
+    xmlns:progressActivity="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.vlonjatg.progressactivity.ProgressActivity
+        android:id="@+id/image_list_progress_activity"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        progressActivity:emptyBackgroundColor="#fbc02d"
+        progressActivity:errorBackgroundColor="#42a5f5"
+        progressActivity:loadingBackgroundColor="#FFFFFF">
+
+        <GridView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:horizontalSpacing="1dp"
+            android:numColumns="4"
+            android:verticalSpacing="1dp"
+            bind:itemLayout="[@layout/image_list_item_layout]"
+            bind:onItemClick="viewProduct"
+            bind:source="{photoPathList}" />
+
+    </com.vlonjatg.progressactivity.ProgressActivity>
+
+</RelativeLayout>

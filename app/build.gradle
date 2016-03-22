@@ -1,0 +1,184 @@
+apply plugin: 'com.android.application'
+apply plugin: 'com.neenbedankt.android-apt'
+//apply plugin: 'com.getkeepsafe.dexcount'
+//apply plugin: 'org.robobinding.android-aspectj'
+
+repositories {
+    maven { url "https://jitpack.io" }
+}
+
+android {
+
+    lintOptions {
+        disable 'UnusedAttribute', 'ValidFragment', 'GradleDependency', 'OnClick', 'MissingPrefix', 'MenuTitle'
+        abortOnError false
+    }
+
+    compileSdkVersion 23
+    buildToolsVersion "23.0.2"
+
+    def currentVersionCode = getVersionCode()
+    def currentVersionName = getVersionName()
+
+    defaultConfig {
+        applicationId "org.robobind.demo"
+        minSdkVersion 17
+        targetSdkVersion 23
+        versionCode currentVersionCode
+        versionName currentVersionName
+    }
+
+    signingConfigs {
+        release {
+            storeFile file("C:\\Users\\Administrator\\.android\\debug.keystore")
+            storePassword "android"
+            keyAlias "androiddebugkey"
+            keyPassword "android"
+        }
+    }
+
+    buildTypes {
+        release {
+            //shrinkResources true
+            minifyEnabled false
+            zipAlignEnabled = true
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
+    //useLibrary 'org.apache.http.legacy'
+
+    productFlavors {
+        def path =projectDir.absolutePath+"\\markets_list.txt"
+        file(path).eachLine { channel ->
+            "$channel" {
+                manifestPlaceholders = [UMENG_CHANNEL_VALUE: channel]
+            }
+        }
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+
+            def outputFile = output.outputFile
+            if (outputFile != null && outputFile.name.endsWith('.apk')) {
+                File outputDirectory = new File(outputFile.parent);
+                def fileName
+                if (variant.buildType.name == "release") {
+                    fileName = "app_v${defaultConfig.versionName}_${packageTime()}_${variant.productFlavors[0].name}_${variant.buildType.name}.apk"
+                } else {
+                    fileName = "app_v${defaultConfig.versionName}_${packageTime()}_beta.apk"
+                }
+                output.outputFile = new File(outputDirectory, fileName)
+            }
+        }
+
+        variant.assemble.doLast {
+            variant.outputs.each { output ->
+                println "===  aligned " + output.outputFile + "  ==="
+                println "===  unaligned " + output.packageApplication.outputFile + "  ==="
+
+                File outApkFile = output.packageApplication.outputFile;
+                if (variant.buildType.zipAlignEnabled && outApkFile.getName().contains("unaligned")) {
+                    println "===  deleting " + outApkFile.getName() + "  ==="
+                    outApkFile.delete()
+                }
+
+            }
+            updateVersionCode()
+        }
+    }
+}
+
+ext {
+    robobindingVersion = 'latest.integration'
+}
+
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    //compile 'junit:junit:4.12'
+    compile 'com.android.support:appcompat-v7:23.2.0'
+    compile 'com.zhy:okhttputils:2.3.5'
+    compile 'com.android.support:recyclerview-v7:23.2.0'
+    compile("org.robobinding:robobinding:${robobindingVersion}:with-aop") {
+        exclude group: 'com.google.guava'
+    }
+    compile "org.robobinding:extras:${robobindingVersion}"
+    compile 'com.google.guava:guava:16.0'
+    //aspectPath "org.robobinding:robobinding:${robobindingVersion}:with-aop"
+    apt "org.robobinding:codegen:$robobindingVersion"
+    compile 'com.github.bumptech.glide:glide:3.7.0'
+    compile 'com.github.vlonjatg:progress-activity:v1.0.3'
+    compile 'it.sephiroth.android.library.imagezoom:imagezoom:+'
+}
+
+def packageTime() {
+    return new Date().format("yyyy-MM-dd", TimeZone.getTimeZone("UTC"))
+}
+
+def getVersionCode() {
+    def versionFile = file('version.properties')
+    if (versionFile.exists()) {
+        def Properties versionProps = new Properties()
+        versionProps.load(new FileInputStream(versionFile))
+        def versionCode = versionProps['versionCode'].toInteger()
+        println('Current version code is ' + versionCode.toString())
+        return versionCode
+    } else {
+        throw new GradleException("Could not find version.properties!")
+    }
+}
+
+def getVersionName(){
+    def versionFile = file('version.properties')
+    if (versionFile.exists()) {
+        def Properties versionProps = new Properties()
+        versionProps.load(new FileInputStream(versionFile))
+        def versionName = versionProps['versionName']
+        println('Current version name is ' + versionName)
+        return versionName
+    } else {
+        throw new GradleException("Could not find version.properties!")
+    }
+}
+
+def updateVersionCode() {
+    def runTasks = gradle.startParameter.taskNames
+
+    if (!('assemble' in runTasks || 'assembleRelease' in runTasks || 'aR' in runTasks)) {
+        return
+    }
+
+    def File versionFile = file('version.properties')
+
+    if (versionFile.exists()) {
+        def Properties versionProps = new Properties()
+        versionProps.load(new FileInputStream(versionFile))
+        def currentVersionCode = versionProps['versionCode'].toInteger()
+        currentVersionCode++
+        versionProps['versionCode'] = currentVersionCode.toString()
+        versionProps.store(versionFile.newWriter(), null)
+        println('Updated version code to ' + currentVersionCode.toString())
+    } else {
+        throw new GradleException("Could not find version.properties!")
+    }
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+task copyAPK(type:Copy){
+    def intofile =projectDir.absolutePath+"/buildApk"
+    delete intofile
+    includeEmptyDirs = false
+    from buildDir.absolutePath+"/outputs/apk"
+    into intofile
+}
